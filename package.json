@@ -1,0 +1,53 @@
+{
+  "name": "sesclick-v2",
+  "version": "2.0.0",
+  "description": "Annotate webpages in Chrome and send screenshots + element context to your OpenCode session. SESCLICK v2-only fork (requires OpenCode >= 2.0.27, V2 plugin API); for OpenCode v1 use the upstream JodusNodus/opencode-chrome-annotation repo.",
+  "type": "module",
+  "main": "./dist/plugin.js",
+  "exports": {
+    ".": "./dist/plugin.js",
+    "./plugin": "./dist/plugin.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bun build src/plugin.ts --target=node --outfile=dist/plugin.js",
+    "build:extension": "node scripts/build-extension.mjs",
+    "typecheck": "tsc --noEmit",
+    "check:extension": "npm run build:extension && node --check extension/background.js && node --check extension/injected/dom.js && node -e \"JSON.parse(require('fs').readFileSync('extension/manifest.json','utf8'))\"",
+    "dev": "bun run build",
+    "dev:setup": "bun run build",
+    "build:zip": "node scripts/build-extension-zip.mjs",
+    "icons:generate": "sips -s format png -z 16 16 icon.svg --out extension/icons/icon16.png && sips -s format png -z 48 48 icon.svg --out extension/icons/icon48.png && sips -s format png -z 128 128 icon.svg --out extension/icons/icon128.png",
+    "prepublishOnly": "bun run build",
+    "publish": "node -e \"if (process.env.npm_command === 'publish') process.exit(0); require('child_process').execSync('npm publish --access public', { stdio: 'inherit' });\""
+  },
+  "keywords": [
+    "opencode",
+    "browser",
+    "annotation",
+    "chrome",
+    "plugin",
+    "localhost"
+  ],
+  "author": "Benjamin Shafii",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eagleeyejack/opencode-chrome-annotation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eagleeyejack/opencode-chrome-annotation/issues"
+  },
+  "homepage": "https://github.com/eagleeyejack/opencode-chrome-annotation#readme",
+  "dependencies": {
+    "@opencode/plugin": "2.0.27"
+  },
+  "devDependencies": {
+    "@types/chrome": "*",
+    "bun-types": "*",
+    "typescript": "*"
+  }
+}

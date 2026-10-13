@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, readdirSync, rmSync, unlinkSync } from "node:fs"
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { spawnSync } from "node:child_process"
 
@@ -23,7 +23,41 @@ copyFileSync(join(sourceDir, "manifest.json"), join(outputDir, "manifest.json"))
 
 const sipsProbe = spawnSync("sips", ["--version"], { cwd: root, stdio: "ignore" })
 if (sipsProbe.error) {
-  console.warn(`warning: skipping icon generation (sips unavailable: ${sipsProbe.error.message}); the extension loads fine without icons`)
+  const generators = [
+    { name: "inkscape", args: (size, out) => [iconSvg, "-w", String(size), "-h", String(size), "-o", out] },
+    { name: "magick", args: (size, out) => [iconSvg, "-resize", `${size}x${size}`, out] },
+    { name: "convert", args: (size, out) => [iconSvg, "-resize", `${size}x${size}`, out] },
+  ]
+  let generator = null
+  for (const candidate of generators) {
+    const probe = spawnSync(candidate.name, ["--version"], { cwd: root, stdio: "ignore" })
+    if (!probe.error) {
+      generator = candidate
+      break
+    }
+  }
+  if (!generator) {
+    const manifestPath = join(outputDir, "manifest.json")
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"))
+    if (manifest.action) {
+      delete manifest.action.default_icon
+    }
+    delete manifest.icons
+    writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n")
+    console.warn("warning: skipping icon generation (no SVG renderer available: inkscape/magick/convert all absent); stripped icon keys from the built manifest")
+  } else {
+    console.log(`generating icons with ${generator.name}`)
+    for (const size of [16, 48, 128]) {
+      const icon = spawnSync(
+        generator.name,
+        generator.args(size, join(outputDir, "icons", `icon${size}.png`)),
+        { cwd: root, stdio: "inherit" }
+      )
+      if (icon.status !== 0) {
+        process.exit(icon.status ?? 1)
+      }
+    }
+  }
 } else {
   for (const size of [16, 48, 128]) {
     const icon = spawnSync(

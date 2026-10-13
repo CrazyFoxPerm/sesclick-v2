@@ -21,14 +21,19 @@ mkdirSync(join(outputDir, "icons"), { recursive: true })
 
 copyFileSync(join(sourceDir, "manifest.json"), join(outputDir, "manifest.json"))
 
-for (const size of [16, 48, 128]) {
-  const icon = spawnSync(
-    "sips",
-    ["-s", "format", "png", "-z", String(size), String(size), iconSvg, "--out", join(outputDir, "icons", `icon${size}.png`)],
-    { cwd: root, stdio: "inherit" }
-  )
-  if (icon.status !== 0) {
-    process.exit(icon.status ?? 1)
+const sipsProbe = spawnSync("sips", ["--version"], { cwd: root, stdio: "ignore" })
+if (sipsProbe.error) {
+  console.warn(`warning: skipping icon generation (sips unavailable: ${sipsProbe.error.message}); the extension loads fine without icons`)
+} else {
+  for (const size of [16, 48, 128]) {
+    const icon = spawnSync(
+      "sips",
+      ["-s", "format", "png", "-z", String(size), String(size), iconSvg, "--out", join(outputDir, "icons", `icon${size}.png`)],
+      { cwd: root, stdio: "inherit" }
+    )
+    if (icon.status !== 0) {
+      process.exit(icon.status ?? 1)
+    }
   }
 }
 

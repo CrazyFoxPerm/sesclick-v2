@@ -507,6 +507,7 @@ function buildStatus(): Record<string, any> {
     app: APP_ID,
     api: "v2",
     plugin: PLUGIN_ID,
+    caps: ["status", "sessions", "claim", "annotation", "unclaim", "session.close"],
     transports: ["session.prompt"],
     version: getPackageVersion(),
     runtime: {

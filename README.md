@@ -8,6 +8,20 @@ Point at what's broken in your live app. Your agent fixes it.
 
 This is the **sesclick-v2 plugin** half of the tool. Pair it with the Chrome extension: a side panel connects any tab to your OpenCode session, you click the broken element on the live page, write what should change, and the agent receives the cropped screenshot, the element's exact selector, and your instruction.
 
+## Quickstart (from source)
+
+```bash
+git clone https://github.com/CrazyFoxPerm/sesclick-v2
+cd sesclick-v2
+bun install
+bun run build          # plugin -> dist/plugin.js
+bun run build:extension  # extension -> extension/
+```
+
+Note: on Linux icon generation is skipped with a warning (macOS-only `sips`) — the extension still loads; on macOS icons are generated.
+
+For plugin config and loading the extension, see `## Install` below.
+
 ## Install
 
 Add the plugin to your OpenCode config (V2 object form):
@@ -19,7 +33,7 @@ Add the plugin to your OpenCode config (V2 object form):
 }
 ```
 
-For local development, place the plugin directory under `.opencode/plugins/` instead — it is auto-discovered.
+For local development, place the plugin directory under `.opencode/plugins/` instead — it is auto-discovered. Until published, use the local path form `{ "package": "./path/to/sesclick-v2" }` instead of the bare `"sesclick-v2"` name above.
 
 Restart OpenCode. It runs a local server on `127.0.0.1` (ports `39240-39260`).
 
